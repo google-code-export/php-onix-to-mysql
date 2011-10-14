@@ -60,7 +60,7 @@ $st = ($start==0?ti():(int)$_GET['st']); // remember when we started with the fi
 $totaal = max((int)$_GET['totaal'], 0); // remember the total number of records we processed from the start of the first chunk
 $size = filesize($file);
 if(!isset($_GET['start'])) $_GET['start'] = 0; // if the startpoint still is not set, set it at 0
-$end = min($size, $mem); // if xml file smaller then chunksize, then don't try and do too much
+$end = min($size, ($start+$mem)); // if xml file smaller then chunksize, then don't try and do too much
 
 if($start < $size) { // are we not already done?
 	$p = file_get_contents($file, NULL, NULL, $start, $end); // load the chunk of xml into memory
