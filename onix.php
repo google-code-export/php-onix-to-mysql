@@ -1,36 +1,36 @@
 <?php
 ##########################################################################
 ##########################################################################
-##  																	                                  ##
-##  This script processes ONIX xml files and inserts them into a		    ##
-##  database. This database does not need to have any pre-existing		  ##
-##  tables or collums, these will be automatically created by the 		  ##
-##  script.																                             ##
-##  																	                                  ##
-##  																                                  	##
-##																	                                    ##
-##  AFTER RUNNING THIS SCRIPT: 										                     ##
-##  update table collums etc. to match content type.				          	##
+##                                                                      ##
+##  This script processes ONIX xml files and inserts them into a        ##
+##  database. This database does not need to have any pre-existing      ##
+##  tables or collums, these will be automatically created by the       ##
+##  script.                                                             ##
+##                                                                      ##
+##                                                                      ##
+##                                                                      ##
+##  AFTER RUNNING THIS SCRIPT:                                          ##
+##  update table collums etc. to match content type.                    ##
 ##  Also you might want to ad some primary keys and indexes afterwards  ##
-##																	                                    ##
-##	Author: Jonathan van Bochove									                      ##
-##  Author url: www.johannes-multimedia.nl								              ##
-##  Author e-mail: webmaster@johannes-multimedia.nl						         ##
-##	Licence: Copyright (c) 2011 Johannes Multimedia					           ##
-##  Released under the GNU General Public License					             ##
-##  Version 1.0 (2011-10-11)											                      ##
-##  																	                                  ##
-##  															                                  		##
-##  																	                                  ##
-##  If you make any alterations to this script to make it more use-		 ##
-##  full, faster or more efficient, please send a copy of the updated 	##
-##  script to the author, and mention what was updated/changed.			   ##
-##  																	                                  ##
-##																	                                    ##
+##                                                                      ##
+##  Author: Jonathan van Bochove                                        ##
+##  Author url: www.johannes-multimedia.nl                              ##
+##  Author e-mail: webmaster@johannes-multimedia.nl                     ##
+##  Licence: Copyright (c) 2011 Johannes Multimedia                     ##
+##  Released under the GNU General Public License                       ##
+##  Version 1.0 (2011-10-11)                                            ##
+##                                                                      ##
+##                                                                      ##
+##                                                                      ##
+##  If you make any alterations to this script to make it more use-     ##
+##  full, faster or more efficient, please send a copy of the updated   ##
+##  script to the author, and mention what was updated/changed.         ##
+##                                                                      ##
+##                                                                      ##
 ##########################################################################
-##																	                                    ##
-##  edit settings below:											                          ##
-##																	                                    ##
+##                                                                      ##
+##  edit settings below:                                                ##
+##                                                                      ##
 ##########################################################################
 ##########################################################################
 
@@ -44,9 +44,9 @@ $uri = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['PHP_SELF']; // scriptlocat
 
 ##########################################################################
 ##########################################################################
-##																		                                  ##
+##                                                                      ##
 ##                           end of settings                            ##
-##																		                                  ##
+##                                                                      ##
 ##########################################################################
 ##########################################################################
 
@@ -58,14 +58,14 @@ function ti() { // function to calculate time used
 $start = max((int)$_GET['start'], 0); // set startpoint of xml file (must be an integer greater then 0)
 $st = ($start==0?ti():(int)$_GET['st']); // remember when we started with the first chunk of data to show total processing time
 $totaal = max((int)$_GET['totaal'], 0); // remember the total number of records we processed from the start of the first chunk
-$size = filesize($file); 
+$size = filesize($file);
 if(!isset($_GET['start'])) $_GET['start'] = 0; // if the startpoint still is not set, set it at 0
 $end = min($size, $mem); // if xml file smaller then chunksize, then don't try and do too much
 
 if($start < $size) { // are we not already done?
 	$p = file_get_contents($file, NULL, NULL, $start, $end); // load the chunk of xml into memory
 	$p = preg_replace("/(.*?)<Product>(.*)/s", "<Product>\\2", $p); // strip the "useless" header and stuff
-	$product = ''; 
+	$product = '';
 	$conn = mysql_connect($dbhost, $dbuser, $dbpw);
 	mysql_select_db($db);
 	$pos = strrpos($p, '</Product>')+10; // find the end of the last record of this chunk of data
