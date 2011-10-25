@@ -18,7 +18,7 @@
 ##  Author e-mail: webmaster@johannes-multimedia.nl                     ##
 ##  Licence: Copyright (c) 2011 Johannes Multimedia                     ##
 ##  Released under the GNU General Public License                       ##
-##  Version 1.0 (2011-10-11)                                            ##
+##  Version 1.1 (2011-10-25)                                            ##
 ##                                                                      ##
 ##                                                                      ##
 ##                                                                      ##
@@ -34,7 +34,7 @@
 ##########################################################################
 ##########################################################################
 
-$mem = 1000000; // Onix chunk size (script won't process more then this at once)
+$mem = 1000000; // Onix chunk size in bytes (script won't process more then this at once)
 $file = "~/onix.xml"; // Location of onix file
 $dbhost = "localhost"; // mysql host
 $dbuser = "my_username"; //mysql username
@@ -133,25 +133,42 @@ if($start < $size) { // are we not already done?
       foreach($produc as $key => $value) {
          $vars = get_object_vars($value);
          if(is_array($vars)&&sizeof($vars)>0){
+            $i = ($key==$varup?($i+1):0);
+            $varup = $key;
             foreach($value as $key2 => $value2) {
                $temp = strtolower($key);
                $vars2 = get_object_vars($value2);
                if(is_array($vars2) && sizeof($vars2)>0){
-                  $i = 0;
-                  foreach($value2 as $key3 => $value3) {
-                     ${$temp}[$id][$i][$key3] = (string)$value3;
-                     $i++;
+                  $j = ($varup2==$key?(int)$j:(j+1));
+                  $varup2 = $key;
+                  foreach($value2 as $key3 => $value3) { // in this array some mysql rows might be saved to join the data later
+                     ${$temp}[$id][$j][$key3] = (string)$value3;
                   }
                } else {
-                  ${$temp}[$id][0][$key2] = (string)$value2;
+                  ${$temp}[$id][$i][$key2] = (string)$value2;
                }
             }
          } else {
-            $product[$id][0][$key] = (string)$value;
+            $i=0;
+            $product[$id][$i][$key] = (string)$value;
          }
       }
-    }
-   
+   }
+   unset($tbl['hide_pub'], $tbl['products_in_shop']); // tables not to be writen into by this script.
+   foreach($tbl as $table => $array) { // check if we can save some inserts by merging records
+      foreach(${$table} as $key => $array) {
+         if(sizeof($array)>0) {
+            for($a = (sizeof($array)-1); $a>0; $a--) {
+               $test = array_merge($array[$a], $array[($a-1)]);
+               if ((sizeof($array[$a]) + sizeof($array[($a-1)])) == sizeof($test)) {
+                  ${$table}[$key][($a-1)] = $test;
+                  unset(${$table}[$key][$a]);
+               }
+            }
+         }
+      }
+   }
+
    // insert each array of data into its own table
    foreach($tbl as $table => $array) {
       $query = "insert into `".mysql_real_escape_string($table)."` (";
@@ -166,7 +183,7 @@ if($start < $size) { // are we not already done?
             # $value2 = array with data to be inserted
             $rows .= "(";
             foreach($array as $k => $v){
-               $rows .= "'".($k=='id'?mysql_real_escape_string($key):(isset($value2[$k])?mysql_real_escape_string($value2[$k]):'')) . "', ";
+               $rows .= "'".($k=='id'?mysql_real_escape_string($key):(isset($value2[$k])?mysql_real_escape_string(utf8_decode($value2[$k])):'')) . "', ";
             }
             $rows = substr($rows, 0, -2) . "), ";
          }   
