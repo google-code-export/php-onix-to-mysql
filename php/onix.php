@@ -34,7 +34,7 @@
 ##########################################################################
 ##########################################################################
 
-$mem = 1000000; // Onix chunk size (script won't process more then this at once)
+$mem = 1000000; // Onix chunk size in bytes (script won't process more then this at once)
 $file = "~/onix.xml"; // Location of onix file
 $dbhost = "localhost"; // mysql host
 $dbuser = "my_username"; //mysql username
@@ -139,7 +139,7 @@ if($start < $size) { // are we not already done?
                $temp = strtolower($key);
                $vars2 = get_object_vars($value2);
                if(is_array($vars2) && sizeof($vars2)>0){
-                  $j = ($varup2==$key?(int)$j:(j+1));
+                  $j = ($varup2==$key?(int)($j+1):$j);
                   $varup2 = $key;
                   foreach($value2 as $key3 => $value3) { // in this array some mysql rows might be saved to join the data later
                      ${$temp}[$id][$j][$key3] = (string)$value3;
