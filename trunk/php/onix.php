@@ -18,7 +18,7 @@
 ##  Author e-mail: webmaster@johannes-multimedia.nl                     ##
 ##  Licence: Copyright (c) 2011 Johannes Multimedia                     ##
 ##  Released under the GNU General Public License                       ##
-##  Version 1.1 (2011-10-25)                                            ##
+##  Version 1.1.1 (2011-10-25)                                          ##
 ##                                                                      ##
 ##                                                                      ##
 ##                                                                      ##
@@ -157,18 +157,21 @@ if($start < $size) { // are we not already done?
    unset($tbl['hide_pub'], $tbl['products_in_shop']); // tables not to be writen into by this script.
    foreach($tbl as $table => $array) { // check if we can save some inserts by merging records
       foreach(${$table} as $key => $array) {
-         if(sizeof($array)>0) {
+          if(sizeof($array)>0) {
+            sort(${$table}[$key]);
+			sort($array);
             for($a = (sizeof($array)-1); $a>0; $a--) {
                $test = array_merge($array[$a], $array[($a-1)]);
                if ((sizeof($array[$a]) + sizeof($array[($a-1)])) == sizeof($test)) {
                   ${$table}[$key][($a-1)] = $test;
-                  unset(${$table}[$key][$a]);
+                  $array[($a-1)] = $test;
+                  unset(${$table}[$key][$a], $array[$a]);
                }
             }
          }
       }
    }
-
+   
    // insert each array of data into its own table
    foreach($tbl as $table => $array) {
       $query = "insert into `".mysql_real_escape_string($table)."` (";
