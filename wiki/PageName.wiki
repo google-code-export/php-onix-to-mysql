@@ -1,4 +1,4 @@
-#summary Help & suppor.
+#summary Help & support.
 
 one question so far:
 = Too many redirects error =
