@@ -18,7 +18,7 @@
 ##  Author e-mail: webmaster@johannes-multimedia.nl                     ##
 ##  Licence: Copyright (c) 2011 Johannes Multimedia                     ##
 ##  Released under the GNU General Public License                       ##
-##  Version 1.1.2 (2012-01-13)                                          ##
+##  Version 1.1.3 (2012-01-13)                                          ##
 ##                                                                      ##
 ##                                                                      ##
 ##                                                                      ##
@@ -35,7 +35,7 @@
 ##########################################################################
 
 $mem = 1000000; // Onix chunk size in bytes (script won't process more then this at once)
-$file = "~/onix.xml"; // Location of onix file
+  $file = "~/onix.xml"; // Location of onix file
 $dbhost = "localhost"; // mysql host
 $dbuser = "my_username"; //mysql username
 $dbpw = "my_password"; // mysql user password
@@ -70,12 +70,12 @@ if($start < $size) { // are we not already done?
    mysql_select_db($db);
    $pos = strripos($p, '</Product>')+10; // find the end of the last record of this chunk of data
    $deleted = strlen($p) - $pos; // help to figure out where to start processing the next chunk of data
-  if($pos>10) { //are there more products to process, or just the onix closing tag left?
+   if($pos>10) { //are there more products to process?
       $products = simplexml_load_string("<xml>".substr($p, 0, $pos)."</xml>"); // do the magic, turn the xml into an xml object that we can process
       unset($p); // clear the memory of the xml string
       if(is_object($products)) $totaal = $totaal + sizeof($products); // how many records to process?
    
-      // Fetch existing tables and collumns
+         // Fetch existing tables and collumns
          $tbls = mysql_query("SHOW TABLES");
          while($temp = mysql_fetch_array($tbls)) {
             $tbl[strtolower($temp[0])] = array();
@@ -87,141 +87,144 @@ if($start < $size) { // are we not already done?
             }
          }
      
-      // if it does not exist, create the first table
-      if(!isset($tbl['product'])) {
-         mysql_query("CREATE TABLE IF NOT EXISTS `product` (`RecordReference` varchar(15) NOT NULL, PRIMARY KEY (`RecordReference`)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-         $tbl['product']['RecordReference'] = " ";
-      }
+         // if it does not exist, create the first table
+         if(!isset($tbl['product'])) {
+            mysql_query("CREATE TABLE IF NOT EXISTS `product` (`id` varchar(15) NOT NULL, PRIMARY KEY (`RecordReference`)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+            $tbl['product']['RecordReference'] = " ";
+         }
      
-      // loop through the chunk of xml to process
-      foreach ($products as $produc) {
-         //check that all used tables and collumns exist, and if not create and update these tables
-         $current = ti();
-         $id = mysql_real_escape_string($produc->RecordReference);
-         foreach($produc as $key => $value) {
-            $vars = get_object_vars($value);
-            if(is_array($vars)&&sizeof($vars)>0){
-               $key = strtolower($key);
-               if(!isset($tbl[$key])) {
-                  mysql_query("CREATE TABLE IF NOT EXISTS `".mysql_real_escape_string($key)."` (`id` varchar(15) NOT NULL, INDEX (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-                  $tbl[$key] = array('id' => 'varchar(15)');
-                  foreach($value as $key2 => $value2) {
-                     $vars2 = get_object_vars($value2);
-                     if(is_array($vars2)&&sizeof($vars2)>0){
-                        foreach($value2 as $key3 => $value3) {
-                           if(!isset($tbl[$key][$key3])) {
-                              mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key3)."` longtext");
-                              $tbl[$key][$key3] = 'longtext';
+         // loop through the chunk of xml to process
+         foreach ($products as $produc) {
+            //check that all used tables and collumns exist, and if not create and update these tables
+            $current = ti();
+            foreach($produc->productidentifier as $value) { 
+                if($value->b221=='03' || $value->b221=='15') $id = mysql_real_escape_string($value->b244);
+                if($value->ProductIDType=='03' || $value->ProductIDType=='15') $id = mysql_real_escape_string($value->IDValue); 
+            }
+            //$id = mysql_real_escape_string($produc->RecordReference);
+            foreach($produc as $key => $value) {
+               $vars = get_object_vars($value);
+               if(is_array($vars)&&sizeof($vars)>0){
+                  $key = strtolower($key);
+                  if(!isset($tbl[$key])) {
+                     mysql_query("CREATE TABLE IF NOT EXISTS `".mysql_real_escape_string($key)."` (`id` varchar(15) NOT NULL, INDEX (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+                     $tbl[$key] = array('id' => 'varchar(15)');
+                     foreach($value as $key2 => $value2) {
+                        $vars2 = get_object_vars($value2);
+                        if(is_array($vars2)&&sizeof($vars2)>0){
+                           foreach($value2 as $key3 => $value3) {
+                              if(!isset($tbl[$key][$key3])) {
+                                 mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key3)."` longtext");
+                                 $tbl[$key][$key3] = 'longtext';
+                              }
+                           }
+                        } else {
+                           if(!isset($tbl[$key][$key2])) {
+                              mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key2)."` longtext");
+                              $tbl[$key][$key2] = 'longtext';
                            }
                         }
-                     } else {
-                        if(!isset($tbl[$key][$key2])) {
-                           mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key2)."` longtext");
-                           $tbl[$key][$key2] = 'longtext';
+                     }
+                  } else {
+                     foreach($value as $key2 => $value2) {
+                        $vars2 = get_object_vars($value2);
+                        if(is_array($vars2)&&sizeof($vars2)>0){
+                           foreach($value2 as $key3 => $value3) {
+                              if(!isset($tbl[$key][$key3])) {
+                                 mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key3)."` longtext");
+                                 $tbl[$key][$key3] = 'longtext';
+                              }
+                           }
+                        } else {
+                           if(!isset($tbl[$key][$key2])) {
+                              mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key2)."` longtext");
+                              $tbl[$key][$key2] = 'longtext';
+                           }
                         }
                      }
                   }
                } else {
+                  if(!isset($tbl['product'][$key])) {
+                     mysql_query("ALTER TABLE product ADD ".mysql_real_escape_string($key)." VARCHAR(128)");
+                     $tbl['product'][$key] = 'varchar(128)';
+                  }
+               }
+            }
+     
+            // seperate the big xml chunk into arrays that match tables
+            foreach($produc as $key => $value) {
+               $vars = get_object_vars($value);
+               if(is_array($vars)&&sizeof($vars)>0){
+                  $i = ($key==$varup?($i+1):0);
+                  $varup = $key;
                   foreach($value as $key2 => $value2) {
+                     $temp = strtolower($key);
                      $vars2 = get_object_vars($value2);
-                     if(is_array($vars2)&&sizeof($vars2)>0){
-                        foreach($value2 as $key3 => $value3) {
-                           if(!isset($tbl[$key][$key3])) {
-                              mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key3)."` longtext");
-                              $tbl[$key][$key3] = 'longtext';
-                           }
+                     if(is_array($vars2) && sizeof($vars2)>0){
+                        $j = ($varup2==$key?(int)($j+1):$j);
+                        $varup2 = $key;
+                        foreach($value2 as $key3 => $value3) { // in this array some mysql rows might be saved to join the data later
+                           ${$temp}[$id][$j][$key3] = (string)$value3;
                         }
                      } else {
-                        if(!isset($tbl[$key][$key2])) {
-                           mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key2)."` longtext");
-                           $tbl[$key][$key2] = 'longtext';
-                        }
+                        ${$temp}[$id][$i][$key2] = (string)$value2;
                      }
                   }
-            }
-            } else {
-               if(!isset($tbl['product'][$key])) {
-                  mysql_query("ALTER TABLE product ADD ".mysql_real_escape_string($key)." VARCHAR(128)");
-                  $tbl['product'][$key] = 'varchar(128)';
+               } else {
+                  $i=0;
+                  $product[$id][$i][$key] = (string)$value;
                }
             }
          }
-     
-         // seperate the big xml chunk into arrays that match tables
-         foreach($produc as $key => $value) {
-            $vars = get_object_vars($value);
-            if(is_array($vars)&&sizeof($vars)>0){
-               $i = ($key==$varup?($i+1):0);
-               $varup = $key;
-               foreach($value as $key2 => $value2) {
-                  $temp = strtolower($key);
-                  $vars2 = get_object_vars($value2);
-                  if(is_array($vars2) && sizeof($vars2)>0){
-                     $j = ($varup2==$key?(int)($j+1):$j);
-                     $varup2 = $key;
-                     foreach($value2 as $key3 => $value3) { // in this array some mysql rows might be saved to join the data later
-                        ${$temp}[$id][$j][$key3] = (string)$value3;
-                     }
-                  } else {
-                     ${$temp}[$id][$i][$key2] = (string)$value2;
-                  }
-               }
-            } else {
-               $i=0;
-               $product[$id][$i][$key] = (string)$value;
-            }
-         }
-      }
-      unset($tbl['hide_pub'], $tbl['products_in_shop']); // tables not to be writen into by this script.
-      foreach($tbl as $table => $array) { // check if we can save some inserts by merging records
-         if(is_array(${$table}) && sizeof(${$table})>0) {
-           foreach(${$table} as $key => $array) {
-               if(sizeof($array)>0) {
-                  sort(${$table}[$key]);
-                  sort($array);
-                  for($a = (sizeof($array)-1); $a>0; $a--) {
-                     $test = array_merge($array[$a], $array[($a-1)]);
-                     if ((sizeof($array[$a]) + sizeof($array[($a-1)])) == sizeof($test)) {
-                        ${$table}[$key][($a-1)] = $test;
-                        $array[($a-1)] = $test;
-                        unset(${$table}[$key][$a], $array[$a]);
-                     }
-                  }
-               }
+         foreach($tbl as $table => $array) { // check if we can save some inserts by merging records
+            if(is_array(${$table}) && sizeof(${$table})>0) {
+              foreach(${$table} as $key => $array) {
+                 if(sizeof($array)>0) {
+                    sort(${$table}[$key]);
+                    sort($array);
+                    for($a = (sizeof($array)-1); $a>0; $a--) {
+                       $test = array_merge($array[$a], $array[($a-1)]);
+                       if ((sizeof($array[$a]) + sizeof($array[($a-1)])) == sizeof($test)) {
+                          ${$table}[$key][($a-1)] = $test;
+                          $array[($a-1)] = $test;
+                          unset(${$table}[$key][$a], $array[$a]);
+                       }
+                    }
+                 }
+              }
            }
-         }
-      }
-      
-      // insert each array of data into its own table
-      foreach($tbl as $table => $array) {
-         $query = "insert into `".mysql_real_escape_string($table)."` (";
-         foreach($array as $key => $useless) {
-            $query .= "`".mysql_real_escape_string($key)."`, ";
-         }
-         $query = substr($query, 0, -2) . ") values ";
-         $rows = "";
-         if(is_array(${$table}) && sizeof(${$table})>0){
-            foreach(${$table} as $key => $value) {
-               foreach($value as $key2 => $value2) {
-                  # $key = isbn
-                  # $value2 = array with data to be inserted
-                  $rows .= "(";
-                  foreach($array as $k => $v){
-                     $rows .= "'".($k=='id'?mysql_real_escape_string($key):(isset($value2[$k])?mysql_real_escape_string(utf8_decode($value2[$k])):'')) . "', ";
-                  }
-                  $rows = substr($rows, 0, -2) . "), ";
-               }  
-            }
         }
-         $rows = substr($rows, 0, -2);
-         mysql_query($query . $rows);
-      }
-   } 
-   if(($end+$start-($deleted+1))<$size) {
-      //header("Location: ".$uri."?start=".($end+$start-($deleted+1))."&st=".$st."&totaal=".$totaal); // continue with the next chunk of xml
-   } else { // finished and show total number of inserted records and processing time
-      echo date("Y-m-d H:i:s") . " records: " . $totaal . " time: " .number_format((ti()-$st), 2, '.', ',')." seconds";
-   }
-mysql_close($conn);
+      
+        // insert each array of data into its own table
+        foreach($tbl as $table => $array) {
+           $query = "insert into `".mysql_real_escape_string($table)."` (";
+           foreach($array as $key => $useless) {
+              $query .= "`".mysql_real_escape_string($key)."`, ";
+           }
+           $query = substr($query, 0, -2) . ") values ";
+           $rows = "";
+           if(is_array(${$table}) && sizeof(${$table})>0){
+              foreach(${$table} as $key => $value) {
+                 foreach($value as $key2 => $value2) {
+                    # $key = isbn
+                    # $value2 = array with data to be inserted
+                    $rows .= "(";
+                    foreach($array as $k => $v){
+                       $rows .= "'".($k=='id'?mysql_real_escape_string($key):(isset($value2[$k])?mysql_real_escape_string(utf8_decode($value2[$k])):'')) . "', ";
+                    }
+                    $rows = substr($rows, 0, -2) . "), ";
+                 }  
+              }
+          }
+          $rows = substr($rows, 0, -2);
+          mysql_query($query . $rows);
+       }
+    } 
+    if(($end+$start-($deleted+1))<$size) {
+       header("Location: ".$uri."?start=".($end+$start-($deleted+1))."&st=".$st."&totaal=".$totaal); // continue with the next chunk of xml
+    } else { // finished and show total number of inserted records and processing time
+       echo date("Y-m-d H:i:s") . " records: " . $totaal . " time: " .number_format((ti()-$st), 2, '.', ',')." seconds";
+    }
+    mysql_close($conn);
 }
 ?>
