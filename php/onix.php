@@ -35,7 +35,7 @@
 ##########################################################################
 
 $mem = 1000000; // Onix chunk size in bytes (script won't process more then this at once)
-  $file = "~/onix.xml"; // Location of onix file
+$file = "~/onix.xml"; // Location of onix file
 $dbhost = "localhost"; // mysql host
 $dbuser = "my_username"; //mysql username
 $dbpw = "my_password"; // mysql user password
