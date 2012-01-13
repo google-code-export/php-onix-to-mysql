@@ -1,0 +1,22 @@
+#summary One-sentence summary of this page.
+= Help & support =
+
+one question so far:
+= Too many redirects error =
+
+Upon trying to process large onix files you can get this error.
+For executing this script from a browser you can replace the serverside redirect with a javascript redirect.
+
+*replace:*
+
+_header("Location: ".$uri."?start=".($end+$start-($deleted+1))."&st=".$st."&totaal=".$totaal);_
+
+*with:*
+
+_?><script type="text/javascript"><!-- window.location = "<?php echo $uri."?start=".($end+$start-($deleted+1))."&st=".$st."&totaal=".$totaal; ?>" //--></script><?php_
+
+
+If you wish to run this script from a cron then try using a tool that allows you to specify the maximum number of redirects. An example for a unix tool:
+_wget --max-redirect=999999 url-to-onix.php_
+
+*or as an alternative you could increase the $mem value.*
