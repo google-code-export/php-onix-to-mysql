@@ -1,5 +1,4 @@
-#summary One-sentence summary of this page.
-= Help & support =
+#summary Help & suppor.
 
 one question so far:
 = Too many redirects error =
