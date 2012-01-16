@@ -109,37 +109,20 @@ if($start < $size) { // are we not already done?
                   if(!isset($tbl[$key])) {
                      mysql_query("CREATE TABLE IF NOT EXISTS `".mysql_real_escape_string($key)."` (`id` varchar(15) NOT NULL, INDEX (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
                      $tbl[$key] = array('id' => 'varchar(15)');
-                     foreach($value as $key2 => $value2) {
-                        $vars2 = get_object_vars($value2);
-                        if(is_array($vars2)&&sizeof($vars2)>0){
-                           foreach($value2 as $key3 => $value3) {
-                              if(!isset($tbl[$key][$key3])) {
-                                 mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key3)."` longtext");
-                                 $tbl[$key][$key3] = 'longtext';
-                              }
-                           }
-                        } else {
-                           if(!isset($tbl[$key][$key2])) {
-                              mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key2)."` longtext");
-                              $tbl[$key][$key2] = 'longtext';
+                  }
+                  foreach($value as $key2 => $value2) {
+                     $vars2 = get_object_vars($value2);
+                     if(is_array($vars2)&&sizeof($vars2)>0){
+                        foreach($value2 as $key3 => $value3) {
+                           if(!isset($tbl[$key][$key3])) {
+                              mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key3)."` longtext");
+                              $tbl[$key][$key3] = 'longtext';
                            }
                         }
-                     }
-                  } else {
-                     foreach($value as $key2 => $value2) {
-                        $vars2 = get_object_vars($value2);
-                        if(is_array($vars2)&&sizeof($vars2)>0){
-                           foreach($value2 as $key3 => $value3) {
-                              if(!isset($tbl[$key][$key3])) {
-                                 mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key3)."` longtext");
-                                 $tbl[$key][$key3] = 'longtext';
-                              }
-                           }
-                        } else {
-                           if(!isset($tbl[$key][$key2])) {
-                              mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key2)."` longtext");
-                              $tbl[$key][$key2] = 'longtext';
-                           }
+                     } else {
+                        if(!isset($tbl[$key][$key2])) {
+                           mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key2)."` longtext");
+                           $tbl[$key][$key2] = 'longtext';
                         }
                      }
                   }
