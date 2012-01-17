@@ -18,7 +18,7 @@
 ##  Author e-mail: webmaster@johannes-multimedia.nl                     ##
 ##  Licence: Copyright (c) 2011 Johannes Multimedia                     ##
 ##  Released under the GNU General Public License                       ##
-##  Version 1.1.3 (2012-01-13)                                          ##
+##  Version 1.1.4 (2012-01-17)                                          ##
 ##                                                                      ##
 ##                                                                      ##
 ##                                                                      ##
@@ -35,11 +35,12 @@
 ##########################################################################
 
 $mem = 1000000; // Onix chunk size in bytes (script won't process more then this at once)
-$file = "~/onix.xml"; // Location of onix file
+  $file = "~/onix.xml"; // Location of onix file
 $dbhost = "localhost"; // mysql host
 $dbuser = "my_username"; //mysql username
 $dbpw = "my_password"; // mysql user password
 $db = "my_database"; // mysql database name
+$prefix = "onix_"; // table prefix
 $uri = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['PHP_SELF']; // scriptlocation e.g. "http://www.example.com/onix/script.php";
 
 ##########################################################################
@@ -76,7 +77,7 @@ if($start < $size) { // are we not already done?
       if(is_object($products)) $totaal = $totaal + sizeof($products); // how many records to process?
    
          // Fetch existing tables and collumns
-         $tbls = mysql_query("SHOW TABLES");
+         $tbls = mysql_query("SHOW TABLES like '".$prefix."%'");
          while($temp = mysql_fetch_array($tbls)) {
             $tbl[strtolower($temp[0])] = array();
          }
@@ -88,24 +89,30 @@ if($start < $size) { // are we not already done?
          }
      
          // if it does not exist, create the first table
-         if(!isset($tbl['product'])) {
-            mysql_query("CREATE TABLE IF NOT EXISTS `product` (`id` varchar(15) NOT NULL, PRIMARY KEY (`RecordReference`)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-            $tbl['product']['RecordReference'] = " ";
+         if(!isset($tbl[$prefix.'product'])) {
+            mysql_query("CREATE TABLE IF NOT EXISTS `".mysql_real_escape_string($prefix."product")."` (`id` varchar(15) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+            $tbl[$prefix.'product']['id'] = " ";
          }
      
          // loop through the chunk of xml to process
          foreach ($products as $produc) {
             //check that all used tables and collumns exist, and if not create and update these tables
             $current = ti();
-            foreach($produc->productidentifier as $value) { 
-                if($value->b221=='03' || $value->b221=='15') $id = mysql_real_escape_string($value->b244);
-                if($value->ProductIDType=='03' || $value->ProductIDType=='15') $id = mysql_real_escape_string($value->IDValue); 
+            if(isset($produc->productidentifier)){
+               foreach($produc->productidentifier as $value) { 
+                   if($value->b221=='03' || $value->b221=='15') $id = mysql_real_escape_string($value->b244);
+               }
+            } else {
+               foreach($produc->ProductIdentifier as $value) { 
+                   if($value->ProductIDType=='03' || $value->ProductIDType=='15') $id = mysql_real_escape_string($value->IDValue);
+               }
             }
+         
             //$id = mysql_real_escape_string($produc->RecordReference);
             foreach($produc as $key => $value) {
                $vars = get_object_vars($value);
                if(is_array($vars)&&sizeof($vars)>0){
-                  $key = strtolower($key);
+                  $key = strtolower($prefix.$key);
                   if(!isset($tbl[$key])) {
                      mysql_query("CREATE TABLE IF NOT EXISTS `".mysql_real_escape_string($key)."` (`id` varchar(15) NOT NULL, INDEX (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
                      $tbl[$key] = array('id' => 'varchar(15)');
@@ -127,9 +134,9 @@ if($start < $size) { // are we not already done?
                      }
                   }
                } else {
-                  if(!isset($tbl['product'][$key])) {
-                     mysql_query("ALTER TABLE product ADD ".mysql_real_escape_string($key)." VARCHAR(128)");
-                     $tbl['product'][$key] = 'varchar(128)';
+                  if(!isset($tbl[$prefix.'product'][$key])) {
+                     mysql_query("ALTER TABLE ".$prefix."product ADD ".mysql_real_escape_string($key)." VARCHAR(128)");
+                     $tbl[$prefix.'product'][$key] = 'varchar(128)';
                   }
                }
             }
@@ -141,7 +148,7 @@ if($start < $size) { // are we not already done?
                   $i = ($key==$varup?($i+1):0);
                   $varup = $key;
                   foreach($value as $key2 => $value2) {
-                     $temp = strtolower($key);
+                     $temp = strtolower($prefix.$key);
                      $vars2 = get_object_vars($value2);
                      if(is_array($vars2) && sizeof($vars2)>0){
                         $j = ($varup2==$key?(int)($j+1):$j);
@@ -155,7 +162,7 @@ if($start < $size) { // are we not already done?
                   }
                } else {
                   $i=0;
-                  $product[$id][$i][$key] = (string)$value;
+                  ${$prefix."product"}[$id][0][$key] = (string)$value;
                }
             }
          }
@@ -177,7 +184,6 @@ if($start < $size) { // are we not already done?
               }
            }
         }
-      
         // insert each array of data into its own table
         foreach($tbl as $table => $array) {
            $query = "insert into `".mysql_real_escape_string($table)."` (";
