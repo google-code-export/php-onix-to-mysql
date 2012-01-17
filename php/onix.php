@@ -18,7 +18,7 @@
 ##  Author e-mail: webmaster@johannes-multimedia.nl                     ##
 ##  Licence: Copyright (c) 2011 Johannes Multimedia                     ##
 ##  Released under the GNU General Public License                       ##
-##  Version 1.1.4 (2012-01-17)                                          ##
+##  Version 1.2.0 (2012-01-17)                                          ##
 ##                                                                      ##
 ##                                                                      ##
 ##                                                                      ##
@@ -93,11 +93,9 @@ if($start < $size) { // are we not already done?
             mysql_query("CREATE TABLE IF NOT EXISTS `".mysql_real_escape_string($prefix."product")."` (`id` varchar(15) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
             $tbl[$prefix.'product']['id'] = " ";
          }
-     
          // loop through the chunk of xml to process
          foreach ($products as $produc) {
             //check that all used tables and collumns exist, and if not create and update these tables
-            $current = ti();
             if(isset($produc->productidentifier)){
                foreach($produc->productidentifier as $value) { 
                    if($value->b221=='03' || $value->b221=='15') $id = mysql_real_escape_string($value->b244);
@@ -109,60 +107,43 @@ if($start < $size) { // are we not already done?
             }
          
             //$id = mysql_real_escape_string($produc->RecordReference);
-            foreach($produc as $key => $value) {
+            foreach($produc as $key => $value) { //loop trough everything building database and writing insert queue
                $vars = get_object_vars($value);
                if(is_array($vars)&&sizeof($vars)>0){
-                  $key = strtolower($prefix.$key);
-                  if(!isset($tbl[$key])) {
+                  $i = ($key==$varup?($i+1):0); //count the number of instances of a certain tag
+                  $varup = $key;
+                  $key = strtolower($prefix.$key); //table names must be lowercase, with prefix prepended
+                  if(!isset($tbl[$key])) { // create missing tables
                      mysql_query("CREATE TABLE IF NOT EXISTS `".mysql_real_escape_string($key)."` (`id` varchar(15) NOT NULL, INDEX (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
                      $tbl[$key] = array('id' => 'varchar(15)');
                   }
                   foreach($value as $key2 => $value2) {
                      $vars2 = get_object_vars($value2);
                      if(is_array($vars2)&&sizeof($vars2)>0){
+                        $j = ($varup2==$key?(int)($j+1):$j); //count the number of instances of a certain lvl2 tag
+                        $varup2 = $key;
                         foreach($value2 as $key3 => $value3) {
-                           if(!isset($tbl[$key][$key3])) {
+                           if(!isset($tbl[$key][$key3])) { //add missing columns to tables
                               mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key3)."` longtext");
                               $tbl[$key][$key3] = 'longtext';
                            }
+                           ${$key}[$id][$j][$key3] = (string)$value3; //write queue for lvl 3 tags, I don't know of any lvl 4 tags so I stop seaarching here, please correct me if I'm wrong
                         }
                      } else {
-                        if(!isset($tbl[$key][$key2])) {
+                        if(!isset($tbl[$key][$key2])) { //add missing columns to tables
                            mysql_query("ALTER TABLE `".mysql_real_escape_string($key)."` ADD `".mysql_real_escape_string($key2)."` longtext");
                            $tbl[$key][$key2] = 'longtext';
                         }
+                        ${$key}[$id][$i][$key2] = (string)$value2; //write queue for lvl 2 tags
                      }
                   }
                } else {
-                  if(!isset($tbl[$prefix.'product'][$key])) {
+                  if(!isset($tbl[$prefix.'product'][$key])) { //update primary table for missing columns
                      mysql_query("ALTER TABLE ".$prefix."product ADD ".mysql_real_escape_string($key)." VARCHAR(128)");
                      $tbl[$prefix.'product'][$key] = 'varchar(128)';
                   }
-               }
-            }
-     
-            // seperate the big xml chunk into arrays that match tables
-            foreach($produc as $key => $value) {
-               $vars = get_object_vars($value);
-               if(is_array($vars)&&sizeof($vars)>0){
-                  $i = ($key==$varup?($i+1):0);
-                  $varup = $key;
-                  foreach($value as $key2 => $value2) {
-                     $temp = strtolower($prefix.$key);
-                     $vars2 = get_object_vars($value2);
-                     if(is_array($vars2) && sizeof($vars2)>0){
-                        $j = ($varup2==$key?(int)($j+1):$j);
-                        $varup2 = $key;
-                        foreach($value2 as $key3 => $value3) { // in this array some mysql rows might be saved to join the data later
-                           ${$temp}[$id][$j][$key3] = (string)$value3;
-                        }
-                     } else {
-                        ${$temp}[$id][$i][$key2] = (string)$value2;
-                     }
-                  }
-               } else {
-                  $i=0;
-                  ${$prefix."product"}[$id][0][$key] = (string)$value;
+                  $i=0; //I don't know of any recurring first lvl tags, so $i is always 0, correct me if I'm wrong
+                  ${$prefix."product"}[$id][0][$key] = (string)$value; //write queue for first lvl tags
                }
             }
          }
