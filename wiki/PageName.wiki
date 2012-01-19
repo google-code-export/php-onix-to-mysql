@@ -24,7 +24,7 @@ _wget --max-redirect=999999 url-to-onix.php_
 
 one tweak:
 = Minor speed improvement =
-This script as is runs with 374 records per second on my server, the here mentioned tweak in my case improves this to 409 records per second. A 9.3% increase in performance.
+This script as is runs with 393 records per second on my server, the here mentioned tweak in my case improves this to 409 records per second. A 4.1% increase in performance.
 It is achieved by setting the unique record id directly instead of looping through each productidentifier. In my case I get a field "RecordReference" that contains the ISBN. There is only one such tag, at highest level, that I can assign directly, where there can be many productidentifiers that I cannot assign directly.
 *For direct assigning replace:*
 
