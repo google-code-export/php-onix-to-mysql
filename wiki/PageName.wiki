@@ -40,5 +40,7 @@ _            if(isset($produc->productidentifier)){
 _
 
 *with:*
+
 _$id = mysql_real_escape_string($produc->RecordReference);_
+
 where $produc->RecordReference should point to a unique value per record
