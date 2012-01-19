@@ -1,4 +1,5 @@
 #summary Help & support.
+#labels Phase-Support
 
 one question so far:
 = Too many redirects error =
@@ -19,3 +20,25 @@ If you wish to run this script from a cron then try using a tool that allows you
 _wget --max-redirect=999999 url-to-onix.php_
 
 *or as an alternative you could increase the $mem value.*
+
+
+one tweak:
+= Minor speed improvement =
+This script as is runs with 374 records per second on my server, the here mentioned tweak in my case improves this to 409 records per second. A 9.3% increase in performance.
+It is achieved by setting the unique record id directly instead of looping through each productidentifier. In my case I get a field "RecordReference" that contains the ISBN. There is only one such tag, at highest level, that I can assign directly, where there can be many productidentifiers that I cannot assign directly.
+*For direct assigning replace:*
+
+_            if(isset($produc->productidentifier)){
+               foreach($produc->productidentifier as $value) { 
+                   if($value->b221=='03' || $value->b221=='15') $id = mysql_real_escape_string($value->b244);
+               }
+            } else {
+               foreach($produc->ProductIdentifier as $value) { 
+                   if($value->ProductIDType=='03' || $value->ProductIDType=='15') $id = mysql_real_escape_string($value->IDValue);
+               }
+            }
+_
+
+*with:*
+_$id = mysql_real_escape_string($produc->RecordReference);_
+where $produc->RecordReference should point to a unique value per record
