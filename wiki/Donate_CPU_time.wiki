@@ -1,12 +1,12 @@
 #labels Phase-Support,Featured
-#Say thank you to the developer of this script
+=Say thank you to the developer of this script=
 
-= I am not asking for cash for any completed work, though am asking you to help contribute to a good cause =
+== I am not asking for cash for any completed work, though am asking you to help contribute to a good cause ==
 
 Malaria is a nasty desease that should get extinct. To help scientists achieve that goal we can contribute CPU time.<br>It' simple, while our computer is doing nothing but is running, it can in the background help to exterminate malaria.
 
 = How to do so =
-Download [http://boinc.berkeley.edu/download.php this] program, execute it, install for all users and then place this file in the folder applicable to  your version of windows (or other operating system)
+Download [http://boinc.berkeley.edu/download.php this] program, execute it, install for all users and then place [code.google.com/p/php-onix-to-mysql/downloads/detail?name=account_www.malariacontrol.net.xml&can=2&q= this] file in the folder applicable to  your version of windows (or other operating system)
 
 *windows 7*
 {{{
