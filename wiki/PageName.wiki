@@ -18,7 +18,7 @@ echo 'Progress: '.number_format((($end+$start-($deleted+1))/$size)*100, 1) . '%'
 }}}
 
 If you wish to run this script from a cron then try using a tool that allows you to specify the maximum number of redirects.<br>
-A tool that works on all platforms is [http://curl.haxx.se/download.html curl].
+A tool that works on all platforms is [http://curl.haxx.se/download.html curl]. (from command prompt / console / batch / bash)
 {{{
 curl.exe -L --max-redirs 99999 http://url_to_your_server/path/to/script/onix.php
 }}}
