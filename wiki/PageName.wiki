@@ -8,16 +8,19 @@ Upon trying to process large onix files you can get this error.
 For executing this script from a browser you can replace the serverside redirect with a javascript redirect.
 
 *replace:*
-
-_header("Location: ".$uri."?start=".($end+$start-($deleted+1))."&st=".$st."&totaal=".$totaal);_
-
+{{{
+header("Location: ".$uri."?start=".($end+$start-($deleted+1))."&st=".$st."&totaal=".$totaal);
+}}}
 *with:*
+{{{
+header("Refresh:0;url=".$uri."?start=".($end+$start-($deleted+1))."&st=".$st."&totaal=".$totaal); // continue with the next chunk of xml
+echo 'Progress: '.number_format((($end+$start-($deleted+1))/$size)*100, 1) . '%';
+}}}
 
-_?><script type="text/javascript"><!-- window.location = "<?php echo $uri."?start=".($end+$start-($deleted+1))."&st=".$st."&totaal=".$totaal; ?>" //--></script><?php_
-
-
-If you wish to run this script from a cron then try using a tool that allows you to specify the maximum number of redirects. An example for a unix tool:
-_wget --max-redirect=999999 url-to-onix.php_
+If you wish to run this script from a cron then try using a tool that allows you to specify the maximum number of redirects. A tool that works on all platforms is [http://curl.haxx.se/download.html curl].
+{{{
+curl.exe -L --max-redirs 99999 http://url_to_your_server/path/to/script/onix.php
+}}}
 
 *or as an alternative you could increase the $mem value.*
 
