@@ -18,7 +18,7 @@
 ##  Author e-mail: webmaster@johannes-multimedia.nl                     ##
 ##  Licence: Copyright (c) 2011 Johannes Multimedia                     ##
 ##  Released under the GNU General Public License                       ##
-##  Version 1.2.0 (2012-01-17)                                          ##
+##  Version 1.2.1 (2012-03-12)                                          ##
 ##                                                                      ##
 ##                                                                      ##
 ##                                                                      ##
@@ -35,11 +35,11 @@
 ##########################################################################
 
 $mem = 1000000; // Onix chunk size in bytes (script won't process more then this at once)
-$file = "~/onix.xml"; // Location of onix file
+$file = "onix_test.xml"; // Location of onix file
 $dbhost = "localhost"; // mysql host
-$dbuser = "my_username"; //mysql username
-$dbpw = "my_password"; // mysql user password
-$db = "my_database"; // mysql database name
+$dbuser = "test"; //mysql username
+$dbpw = "test"; // mysql user password
+$db = "test"; // mysql database name
 $prefix = "onix_"; // table prefix
 $uri = "http://". $_SERVER['SERVER_NAME'] . $_SERVER['PHP_SELF']; // scriptlocation e.g. "http://www.example.com/onix/script.php";
 
@@ -65,12 +65,16 @@ $end = min(($size-$start), $mem); // if xml file smaller then chunksize, then do
 
 if($start < $size) { // are we not already done?
    $p = file_get_contents($file, NULL, NULL, $start, $end); // load the chunk of xml into memory
+   $pos = strripos($p, '</Product>')+10; // find the initial end of the last record of this chunk of data
+   $deleted = strlen($p) - $pos; // help to figure out where to start processing the next chunk of data
    $p = preg_replace("/(.*?)<([Pp])roduct(.*?)>(.*)/s", "<\\2roduct>\\4", $p); // strip the "useless" header and stuff
+   $p = preg_replace("!<br />!", "&#60;br /&#62;", $p); //turning possible <br /> html into its special chars equivalent
+   $p = preg_replace('!<(.*?) (.*?)="(.*?)">!', '<\\2>\\3</\\2><\\1>', $p); //turning tag values into their own tags
+   $pos = strripos($p, '</Product>')+10; // find the end of the last record of this chunk of data, after modifications from above
    $product = '';
    $conn = mysql_connect($dbhost, $dbuser, $dbpw);
    mysql_select_db($db);
-   $pos = strripos($p, '</Product>')+10; // find the end of the last record of this chunk of data
-   $deleted = strlen($p) - $pos; // help to figure out where to start processing the next chunk of data
+
    if($pos>10) { //are there more products to process?
       $products = simplexml_load_string("<xml>".substr($p, 0, $pos)."</xml>"); // do the magic, turn the xml into an xml object that we can process
       unset($p); // clear the memory of the xml string
@@ -105,8 +109,6 @@ if($start < $size) { // are we not already done?
                    if($value->ProductIDType=='03' || $value->ProductIDType=='15') $id = mysql_real_escape_string($value->IDValue);
                }
             }
-         
-            //$id = mysql_real_escape_string($produc->RecordReference);
             foreach($produc as $key => $value) { //loop trough everything building database and writing insert queue
                $vars = get_object_vars($value);
                if(is_array($vars)&&sizeof($vars)>0){
