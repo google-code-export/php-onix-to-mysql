@@ -32,7 +32,8 @@ This script as is runs with 393 records per second on my server, the here mentio
 It is achieved by setting the unique record id directly instead of looping through each productidentifier. In my case I get a field "RecordReference" that contains the ISBN. There is only one such tag, at highest level, that I can assign directly, where there can be many productidentifiers that I cannot assign directly.
 *For direct assigning replace:*
 
-_            if(isset($produc->productidentifier)){
+{{{
+            if(isset($produc->productidentifier)){
                foreach($produc->productidentifier as $value) { 
                    if($value->b221=='03' || $value->b221=='15') $id = mysql_real_escape_string($value->b244);
                }
@@ -41,10 +42,11 @@ _            if(isset($produc->productidentifier)){
                    if($value->ProductIDType=='03' || $value->ProductIDType=='15') $id = mysql_real_escape_string($value->IDValue);
                }
             }
-_
+}}}
 
 *with:*
+{{{
+$id = mysql_real_escape_string($produc->RecordReference);
+}}}
 
-_$id = mysql_real_escape_string($produc->RecordReference);_
-
-where '$produc->RecordReference' should point to a unique value per record
+where `$produc->RecordReference` should point to a unique value per record
