@@ -47,4 +47,4 @@ _
 
 _$id = mysql_real_escape_string($produc->RecordReference);_
 
-where $produc->RecordReference should point to a unique value per record
+where '$produc->RecordReference' should point to a unique value per record
