@@ -13,7 +13,7 @@ header("Location: ".$uri."?start=".($end+$start-($deleted+1))."&st=".$st."&totaa
 }}}
 *with:*
 {{{
-header("Refresh:0;url=".$uri."?start=".($end+$start-($deleted+1))."&st=".$st."&totaal=".$totaal); // continue with the next chunk of xml
+header("Refresh:0;url=".$uri."?start=".($end+$start-($deleted+1))."&st=".$st."&totaal=".$totaal);
 echo 'Progress: '.number_format((($end+$start-($deleted+1))/$size)*100, 1) . '%';
 }}}
 
