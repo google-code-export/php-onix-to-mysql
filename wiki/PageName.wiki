@@ -28,20 +28,20 @@ curl.exe -L --max-redirs 99999 http://url_to_your_server/path/to/script/onix.php
 
 one tweak:
 = Minor speed improvement =
-This script as is runs with 393 records per second on my server, the here mentioned tweak in my case improves this to 409 records per second. A 4.1% increase in performance.
-It is achieved by setting the unique record id directly instead of looping through each productidentifier. In my case I get a field "RecordReference" that contains the ISBN. There is only one such tag, at highest level, that I can assign directly, where there can be many productidentifiers that I cannot assign directly.
+This script as is runs with 393 records per second on my server, the here mentioned tweak in my case improves this to 409 records per second. A 4.1% increase in performance.<br>
+It is achieved by setting the unique record id directly instead of looping through each productidentifier. In my case I get a field "RecordReference" that contains the ISBN. There is only one such tag, at highest level, that I can assign directly, where there can be many productidentifiers that I cannot assign directly.<br>
 *For direct assigning replace:*
 
 {{{
-            if(isset($produc->productidentifier)){
-               foreach($produc->productidentifier as $value) { 
-                   if($value->b221=='03' || $value->b221=='15') $id = mysql_real_escape_string($value->b244);
-               }
-            } else {
-               foreach($produc->ProductIdentifier as $value) { 
-                   if($value->ProductIDType=='03' || $value->ProductIDType=='15') $id = mysql_real_escape_string($value->IDValue);
-               }
-            }
+if(isset($produc->productidentifier)){
+   foreach($produc->productidentifier as $value) { 
+      if($value->b221=='03' || $value->b221=='15') $id = mysql_real_escape_string($value->b244);
+   }
+} else {
+   foreach($produc->ProductIdentifier as $value) { 
+      if($value->ProductIDType=='03' || $value->ProductIDType=='15') $id = mysql_real_escape_string($value->IDValue);
+   }
+}
 }}}
 
 *with:*
