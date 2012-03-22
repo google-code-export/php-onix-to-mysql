@@ -6,17 +6,8 @@
 Malaria is a nasty desease that should get extinct. To help scientists achieve that goal we can contribute CPU time.<br>It' simple, while our computer is doing nothing but is running, it can in the background help to exterminate malaria.
 
 = How to do so =
-Download [http://boinc.berkeley.edu/download.php this] program, execute it, install for all users and then place [http://code.google.com/p/php-onix-to-mysql/downloads/detail?name=account_www.malariacontrol.net.xml&can=2&q= this] file in the folder applicable to  your version of windows (or other operating system)
-
-*windows 7*
+Download [http://boinc.berkeley.edu/download.php this] program, execute it, install it and then click on Activity --> Attach to account manager --> choose BAM --> username:
 {{{
-C:\Documents and Settings\All Users\BOINC
+120025_77de660a008ea5889e16a9fb2878bcb4
 }}}
-
-*Windows XP*
-{{{
-C:\Documents and Settings\All Users\Application Data\BOINC
-}}}
-
-and then restart the ccomputer.
-Why use this custom file? That is so that I can see how many people contribute because of this project :)
+with a password you like.
