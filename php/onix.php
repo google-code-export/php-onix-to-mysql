@@ -18,7 +18,7 @@
 ##  Author e-mail: webmaster@johannes-multimedia.nl                     ##
 ##  Licence: Copyright (c) 2011 Johannes Multimedia                     ##
 ##  Released under the GNU General Public License                       ##
-##  Version 1.2.1 (2012-03-12)                                          ##
+##  Version 1.2.2 (2013-02-18)                                          ##
 ##                                                                      ##
 ##                                                                      ##
 ##                                                                      ##
@@ -69,7 +69,7 @@ if($start < $size) { // are we not already done?
    $deleted = strlen($p) - $pos; // help to figure out where to start processing the next chunk of data
    $p = preg_replace("/(.*?)<([Pp])roduct(.*?)>(.*)/s", "<\\2roduct>\\4", $p); // strip the "useless" header and stuff
    $p = preg_replace("!<br />!", "&#60;br /&#62;", $p); //turning possible <br /> html into its special chars equivalent
-   $p = preg_replace('!<(.*?) (.*?)="(.*?)">!', '<\\2>\\3</\\2><\\1>', $p); //turning tag values into their own tags
+   $p = preg_replace('!<([^ ]+) ([^=]+)="(.*?)">!', '<\\2>\\3</\\2><\\1>', $p); //turning tag values into their own tags
    $pos = strripos($p, '</Product>')+10; // find the end of the last record of this chunk of data, after modifications from above
    $product = '';
    $conn = mysql_connect($dbhost, $dbuser, $dbpw);
